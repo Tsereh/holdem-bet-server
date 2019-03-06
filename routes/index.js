@@ -14,10 +14,10 @@ router.get('/', function(req, res, next) {
 
 io.on("connection", (socket) => {
   console.log("user connected");
-  console.log(rooms);
 
   // User creates new room
   socket.on("createroom", (username) => {
+    console.log(rooms);
     //generate random room key
     let room = "";
     let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -39,14 +39,28 @@ io.on("connection", (socket) => {
     const room = data.roomKey.toUpperCase();
     const username = data.username;
     if(rooms.includes(room)) {
+      let users = [];
+      const clients = io.sockets.adapter.rooms[room].sockets;
+      for (let clientId in clients) {
+        const clientSocket = io.sockets.connected[clientId];
+
+        users.push(clientSocket.username);
+      }
+
       socket.username = username;
+
       socket.join(room);
+      socket.emit("usersinroom", users);
       io.sockets.in(room).emit("userjoined", username);
       console.log(username + " joined room " + room);
     } else {
       console.log(username + " tried to join unexisting room: " + room);
-      socket.emit("err", "ERROR, No Room named " + room);
+      socket.emit("noroomfound", room);
     }
+  });
+
+  socket.on("disconnect", function() {
+    console.log("user has left");
   });
 });
 
