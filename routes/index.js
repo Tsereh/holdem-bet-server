@@ -5,7 +5,7 @@ app = express();
 server = http.createServer();
 io = require("socket.io").listen(server);
 
-let rooms = [];
+let rooms = {};
 
 
 router.get('/', function(req, res, next) {
@@ -17,50 +17,62 @@ io.on("connection", (socket) => {
 
   // User creates new room
   socket.on("createroom", (username) => {
-    console.log(rooms);
     //generate random room key
-    let room = "";
+    let roomKey = "";
     let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (let i = 0; i < 4; i++)
-      room += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    rooms.push(room);
-    console.log("Created room: " + room);
+      roomKey += possible.charAt(Math.floor(Math.random() * possible.length));
 
     socket.username = username;
-    socket.join(room);
-    console.log("Joined room: " + room);
+    socket.join(roomKey);
 
-    io.sockets.in(room).emit("createdroom", room);
+//    rooms.push(room);
+    rooms[roomKey] = {};
+    rooms[roomKey].name = roomKey;
+    rooms[roomKey].minBuyIn = 50.00;
+    rooms[roomKey].maxBuyIn = 250.00;
+    rooms[roomKey].smallBlind = 1.00;
+    rooms[roomKey].bigBlind = 2.00;
+
+    rooms[roomKey].users = {};
+    rooms[roomKey].users[username] = {};
+    rooms[roomKey].users[username].name = username;
+    rooms[roomKey].users[username].balance = 0.00;
+    rooms[roomKey].users[username].admin = true;
+
+
+    console.log("Joined room: " + roomKey);
+
+    socket.emit("createdroom", rooms[roomKey]);
+    console.log(rooms);
   });
 
   // User joins existing room
   socket.on("joinroom", (data) => {
-    const room = data.roomKey.toUpperCase();
+    const roomKey = data.roomKey.toUpperCase();
     const username = data.username;
-    if(rooms.includes(room)) {
-      let users = [];
-      const clients = io.sockets.adapter.rooms[room].sockets;
-      for (let clientId in clients) {
-        const clientSocket = io.sockets.connected[clientId];
-
-        users.push(clientSocket.username);
-      }
+    if(io.sockets.adapter.rooms[roomKey]) {
 
       socket.username = username;
+      socket.join(roomKey);
 
-      socket.join(room);
-      socket.emit("usersinroom", users);
-      io.sockets.in(room).emit("userjoined", username);
-      console.log(username + " joined room " + room);
+      rooms[roomKey].users[username].name = username;
+      rooms[roomKey].users[username].balance = 0.00;
+      rooms[roomKey].users[username].admin = false;
+
+      socket.emit("roomdata", rooms[roomKey]);
+      io.sockets.in(roomKey).emit("userjoined", rooms[roomKey].users[username]);
+      console.log(username + " joined room " + roomKey);
     } else {
       console.log(username + " tried to join unexisting room: " + room);
       socket.emit("noroomfound", room);
     }
+    console.log(rooms);
   });
 
   socket.on("disconnect", function() {
     console.log("user has left");
+    console.log(rooms);
   });
 });
 
