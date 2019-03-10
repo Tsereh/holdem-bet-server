@@ -29,7 +29,7 @@ io.on("connection", (socket) => {
 //    rooms.push(room);
     rooms[roomKey] = {};
     rooms[roomKey].name = roomKey;
-    rooms[roomKey].minBuyIn = 50.00;
+    rooms[roomKey].minBuyIn = 20.00;
     rooms[roomKey].maxBuyIn = 250.00;
     rooms[roomKey].smallBlind = 1.00;
     rooms[roomKey].bigBlind = 2.00;
@@ -64,10 +64,16 @@ io.on("connection", (socket) => {
       io.sockets.in(roomKey).emit("userjoined", rooms[roomKey].users[username]);
       console.log(username + " joined room " + roomKey);
     } else {
-      console.log(username + " tried to join unexisting room: " + room);
-      socket.emit("noroomfound", room);
+      console.log(username + " tried to join unexisting room: " + roomKey);
+      socket.emit("noroomfound", roomKey);
     }
     console.log(rooms);
+  });
+
+  socket.on("userbuyin", (roomKey, username, amount, position) => {
+    rooms[roomKey].users[username].balance = rooms[roomKey].users[username].balance + amount;
+
+    io.in(roomKey).emit("userrefilled", username, rooms[roomKey].users[username].balance, position);
   });
 
   socket.on("disconnect", function() {
