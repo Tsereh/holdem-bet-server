@@ -70,14 +70,22 @@ io.on("connection", (socket) => {
     console.log(rooms);
   });
 
-  socket.on("userbuyin", (roomKey, username, amount, position) => {
+  socket.on("userbuyin", (roomKey, username, amount) => {
     rooms[roomKey].users[username].balance = rooms[roomKey].users[username].balance + amount;
 
-    io.in(roomKey).emit("userrefilled", username, rooms[roomKey].users[username].balance, position);
+    io.in(roomKey).emit("userrefilled", username, rooms[roomKey].users[username].balance);
   });
 
-  socket.on("disconnect", function() {
-    console.log("user has left");
+  socket.on("disconnectwithdata", (roomKey, username) => {
+    socket.disconnect();
+    delete rooms[roomKey].users[username];
+    console.log(username + " left room " + roomKey);
+    if (isEmpty(rooms[roomKey].users)) {
+      delete rooms[roomKey];
+      console.log("All users leaved room " + roomKey + ", room deleted");
+    } else {
+      io.sockets.in(roomKey).emit("userdisconnected", username);
+    }
     console.log(rooms);
   });
 });
@@ -87,3 +95,8 @@ server.listen(3000, () => {
 });
 
 module.exports = router;
+
+
+function isEmpty( obj ) {
+  return Object.keys(obj).length === 0;
+}
