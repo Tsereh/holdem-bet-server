@@ -62,7 +62,7 @@ io.on("connection", (socket) => {
       rooms[roomKey].users[username].admin = false;
 
       socket.emit("roomdata", rooms[roomKey]);
-      io.sockets.in(roomKey).emit("userjoined", rooms[roomKey].users[username]);
+      socket.to(roomKey).emit("userjoined", rooms[roomKey].users[username]);
       console.log(username + " joined room " + roomKey);
     } else {
       console.log(username + " tried to join unexisting room: " + roomKey);
@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
       delete rooms[roomKey];
       console.log("All users leaved room " + roomKey + ", room deleted");
     } else {
-      io.sockets.in(roomKey).emit("userdisconnected", username);
+      socket.to(roomKey).emit("userdisconnected", username);
     }
     console.log(rooms);
   });
