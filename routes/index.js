@@ -56,6 +56,7 @@ io.on("connection", (socket) => {
       socket.username = username;
       socket.join(roomKey);
 
+      rooms[roomKey].users[username] = {};
       rooms[roomKey].users[username].name = username;
       rooms[roomKey].users[username].balance = 0.00;
       rooms[roomKey].users[username].admin = false;
