@@ -313,8 +313,6 @@ server.listen(port, () => {
   console.log("Node app is running on port 3000");
 });
 
-module.exports = router;
-
 
 function isEmpty( obj ) {
   return Object.keys(obj).length === 0;
@@ -390,3 +388,5 @@ function getLastToAct(roomKey, lastKnownUnfolded) {
     }
   }
 }
+
+module.exports = router;
