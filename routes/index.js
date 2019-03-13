@@ -229,6 +229,14 @@ io.on("connection", (socket) => {
     rooms[roomKey].users[playerName].bet = rooms[roomKey].currentBiggestBet;
     io.in(roomKey).emit("playercalled", playerName);
 
+    let smallestBet;
+    for (let user in rooms[roomKey].users) {
+      const cUser = rooms[roomKey].users[user];
+      if (smallestBet == null || cUser.currentBet < smallestBet) {
+        smallestBet = cUser.currentBet;
+      }
+    }
+
     if (roomsStage===1) {
       // Pre-flop, Big Blind is last to act
       if (playerSeat===getLastToAct(roomKey, 1).seat) {
