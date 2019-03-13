@@ -156,11 +156,12 @@ io.on("connection", (socket) => {
     let unfoledCount = 0;
     let smallestBet;
     for (let user in rooms[roomKey].users) {
-      if (!user.fold) {
+      const cUser = rooms[roomKey].users[user];
+      if (!cUser.fold) {
         unfoledCount++;
       }
-      if (smallestBet == null || user.currentBet < smallestBet) {
-        smallestBet = user.currentBet;
+      if (smallestBet == null || cUser.currentBet < smallestBet) {
+        smallestBet = cUser.currentBet;
       }
     }
 
@@ -326,88 +327,6 @@ io.on("connection", (socket) => {
     }
     console.log(rooms);
   });
-
-
-  function isEmpty( obj ) {
-    return Object.keys(obj).length === 0;
-  }
-
-// Collects users bets into rooms pot, changes games stage/state
-  function endRound(roomKey) {
-    let roundsPot = 0.00;
-    for (let user in rooms[roomKey].users) {
-      roundsPot = roundsPot + user.currentBet;
-      rooms[roomKey].users[user.name].currentBet = 0.00;
-    }
-    rooms[roomKey].pot = roundsPot;
-    rooms[roomKey].currentBiggestBet = 0.00;
-
-    if (rooms[roomKey].stage != 4) {
-      rooms[roomKey].stage++;
-    }
-  }
-
-// If requested User folded, get next unfolded User
-  function getUserBySeat(roomKey, nextSeat) {
-    if (nextSeat === (Object.keys(rooms[roomKey].users).length)) {
-      console.tog("Got over the range of users, get user from seat 0");
-      nextSeat = 0;
-    }
-    console.log("Iterate through users in room " + roomKey);
-    for (let user in rooms[roomKey].users) {
-      console.log(user);
-      if (user.seat === nextSeat) {
-        console.log("User found");
-        if (user.fold) {
-          console.log("User folded, going deeper");
-          return getUserBySeat(roomKey, (nextSeat+1));
-        } else {
-          console.log("User not folded, returning this user");
-          return user;
-        }
-      }
-    }
-  }
-
-  function getRoomsAdmin(roomKey) {
-    for (let user in rooms[roomKey].users) {
-      if (user.admin) {
-        return user;
-      }
-    }
-  }
-
-  function resetFolds(roomKey) {
-    for (let user in rooms[roomKey].users) {
-      user.fold = false;
-    }
-  }
-
-  function getLastUnfolded(roomKey) {
-    for (let user in rooms[roomKey].users) {
-      if (!user.fold) {
-        return user;
-      }
-    }
-  }
-
-// Last to act player who is not folded yet
-// For example if it is pre-flop, last to act is 1/BigBlind, if he folded and someone else raised, last to act in the round is 0/SmallBlind, if he did not fold yet.
-  function getLastToAct(roomKey, lastKnownUnfolded) {
-    for (let user in rooms[roomKey].users) {
-      if (user.seat===lastKnownUnfolded) {
-        if (!user.fold) {
-          return user;
-        } else {
-          if (lastKnownUnfolded===0) {
-            return getLastToAct(roomKey, (Object.keys(rooms[roomKey].users).length-1));
-          } else {
-            return getLastToAct(roomKey, (lastKnownUnfolded-1));
-          }
-        }
-      }
-    }
-  }
 });
 
 let port = process.env.PORT;
@@ -417,5 +336,94 @@ if (port == null || port == "") {
 server.listen(port, () => {
   console.log("Node app is running on port 3000");
 });
+
+
+
+function isEmpty( obj ) {
+  return Object.keys(obj).length === 0;
+}
+
+// Collects users bets into rooms pot, changes games stage/state
+function endRound(roomKey) {
+  let roundsPot = 0.00;
+  for (let user in rooms[roomKey].users) {
+    const cUser = rooms[roomKey].users[user];
+    roundsPot = roundsPot + cUser.currentBet;
+    rooms[roomKey].users[cUser.name].currentBet = 0.00;
+  }
+  rooms[roomKey].pot = roundsPot;
+  rooms[roomKey].currentBiggestBet = 0.00;
+
+  if (rooms[roomKey].stage != 4) {
+    rooms[roomKey].stage++;
+  }
+}
+
+// If requested User folded, get next unfolded User
+function getUserBySeat(roomKey, nextSeat) {
+  if (nextSeat === (Object.keys(rooms[roomKey].users).length)) {
+    console.log("Got over the range of users, get user from seat 0");
+    nextSeat = 0;
+  }
+  console.log("Iterate through users in room " + roomKey);
+  for (let user in rooms[roomKey].users) {
+    const cUser = rooms[roomKey].users[user];
+    console.log(cUser);
+    if (cUser.seat === nextSeat) {
+      console.log("User found");
+      if (cUser.fold) {
+        console.log("User folded, going deeper");
+        return getUserBySeat(roomKey, (nextSeat+1));
+      } else {
+        console.log("User not folded, returning this user");
+        return cUser;
+      }
+    }
+  }
+}
+
+function getRoomsAdmin(roomKey) {
+  for (let user in rooms[roomKey].users) {
+    const cUser = rooms[roomKey].users[user];
+    if (cUser.admin) {
+      return cUser;
+    }
+  }
+}
+
+function resetFolds(roomKey) {
+  for (let user in rooms[roomKey].users) {
+    const cUser = rooms[roomKey].users[user];
+    cUser.fold = false;
+  }
+}
+
+function getLastUnfolded(roomKey) {
+  for (let user in rooms[roomKey].users) {
+    const cUser = rooms[roomKey].users[user];
+    if (!cUser.fold) {
+      return cUser;
+    }
+  }
+}
+
+// Last to act player who is not folded yet
+// For example if it is pre-flop, last to act is 1/BigBlind, if he folded and someone else raised, last to act in the round is 0/SmallBlind, if he did not fold yet.
+function getLastToAct(roomKey, lastKnownUnfolded) {
+  for (let user in rooms[roomKey].users) {
+    const cUser = rooms[roomKey].users[user];
+    if (cUser.seat===lastKnownUnfolded) {
+      if (!cUser.fold) {
+        return cUser;
+      } else {
+        if (lastKnownUnfolded===0) {
+          return getLastToAct(roomKey, (Object.keys(rooms[roomKey].users).length-1));
+        } else {
+          return getLastToAct(roomKey, (lastKnownUnfolded-1));
+        }
+      }
+    }
+  }
+}
 
 module.exports = router;
