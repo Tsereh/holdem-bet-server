@@ -86,10 +86,12 @@ io.on("connection", (socket) => {
     rooms[roomKey].stage = 1;
     if (Object.keys(rooms[roomKey].users).length > 2) {
       // If more than 2 players in the room, find UTG and send action request
-      io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 2).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
+      const nextUser = getUserBySeat(roomKey, 2);
+      io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
     } else {
       // If only two players in the room, send action request to SB
-      io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 0).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
+      const nextUser = getUserBySeat(roomKey, 0);
+      io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
     }
   });
 
@@ -106,10 +108,12 @@ io.on("connection", (socket) => {
         endRound(roomKey);
         io.in(roomKey).emit("roundended", rooms[roomKey].pot);
         // New round started, it's Small Blinds turn
-        io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 0).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
+        const nextUser = getUserBySeat(roomKey, 0);
+        io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
       } else {
         // Someone else than Big Blind checked, give turn to the next player
-        io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
+        const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+        io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
       }
     } else {
       // Post-flop, round ends on dealer
@@ -127,11 +131,13 @@ io.on("connection", (socket) => {
           // Game can continue to the next stage
           endRound(roomKey);
           io.in(roomKey).emit("roundended", rooms[roomKey].pot);
-          io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 0).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
+          const nextUser = getUserBySeat(roomKey, 0);
+          io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
         }
       } else {
         // Someone else than dealer checked, give turn to the next player
-        io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
+        const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+        io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
       }
     }
   });
@@ -170,14 +176,17 @@ io.on("connection", (socket) => {
             // Bets are equal, Game can continue to the next round
             endRound(roomKey);
             io.in(roomKey).emit("roundended", rooms[roomKey].pot);
-            io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 0).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+            const nextUser = getUserBySeat(roomKey, 0);
+            io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
           } else {
             // Bets inequal, give turn to the next player until all bets are equal or only one player left
-            io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+            const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+            io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
           }
         } else {
           // Someone else than Big Blind acted in pre-flop round, turn to next player
-          io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+          const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+          io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
         }
       } else {
         // Post-flop, round ends on Dealer
@@ -194,15 +203,18 @@ io.on("connection", (socket) => {
               const admin = getRoomsAdmin(roomKey);
               io.in(admin.id).emit("pickwinner");
             } else {
-              io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 0).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+              const nextUser = getUserBySeat(roomKey, 0);
+              io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
             }
           } else {
             // Bets inequal, give turn to the next player until all bets are equal or only one player left
-            io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+            const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+            io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
           }
         } else {
           // Someone else than Dealer folded, turn to next
-          io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+          const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+          io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
         }
       }
     }
@@ -224,14 +236,17 @@ io.on("connection", (socket) => {
           // Bets are equal, Game can continue to the next round
           endRound(roomKey);
           io.in(roomKey).emit("roundended", rooms[roomKey].pot);
-          io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 0).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+          const nextUser = getUserBySeat(roomKey, 0);
+          io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
         } else {
           // Bets inequal, give turn to the next player until all bets are equal or only one player left
-          io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+          const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+          io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
         }
       } else {
         // Someone else than Big Blind acted in pre-flop round, turn to next player
-        io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+        const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+        io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
       }
     } else {
       // Post-flop, round ends on Dealer
@@ -248,15 +263,18 @@ io.on("connection", (socket) => {
             const admin = getRoomsAdmin(roomKey);
             io.in(admin.id).emit("pickwinner");
           } else {
-            io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, 0).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+            const nextUser = getUserBySeat(roomKey, 0);
+            io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
           }
         } else {
           // Bets inequal, give turn to the next player until all bets are equal or only one player left
-          io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+          const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+          io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
         }
       } else {
         // Someone else than Dealer folded, turn to next
-        io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+        const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+        io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
       }
     }
   });
@@ -269,7 +287,8 @@ io.on("connection", (socket) => {
 
     io.in(roomKey).emit("playerraised", playerName, raisedBet);
 
-    io.in(roomKey).emit("turngiven", getUserBySeat(roomKey, (playerSeat+1)).name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
+    const nextUser = getUserBySeat(roomKey, (playerSeat+1));
+    io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);
   });
 
   // Admin picked the winners
@@ -303,6 +322,82 @@ io.on("connection", (socket) => {
     }
     console.log(rooms);
   });
+
+
+  function isEmpty( obj ) {
+    return Object.keys(obj).length === 0;
+  }
+
+// Collects users bets into rooms pot, changes games stage/state
+  function endRound(roomKey) {
+    let roundsPot = 0.00;
+    for (let user in rooms[roomKey].users) {
+      roundsPot = roundsPot + user.currentBet;
+      rooms[roomKey].users[user.name].currentBet = 0.00;
+    }
+    rooms[roomKey].pot = roundsPot;
+    rooms[roomKey].currentBiggestBet = 0.00;
+
+    if (rooms[roomKey].stage != 4) {
+      rooms[roomKey].stage++;
+    }
+  }
+
+// If requested User folded, get next unfolded User
+  function getUserBySeat(roomKey, nextSeat) {
+    if (nextSeat === (Object.keys(rooms[roomKey].users).length)) {
+      nextSeat = 0;
+    }
+    for (let user in rooms[roomKey].users) {
+      if (user.seat === nextSeat) {
+        if (user.fold) {
+          return getUserBySeat(roomKey, (nextSeat+1));
+        } else {
+          return user;
+        }
+      }
+    }
+  }
+
+  function getRoomsAdmin(roomKey) {
+    for (let user in rooms[roomKey].users) {
+      if (user.admin) {
+        return user;
+      }
+    }
+  }
+
+  function resetFolds(roomKey) {
+    for (let user in rooms[roomKey].users) {
+      user.fold = false;
+    }
+  }
+
+  function getLastUnfolded(roomKey) {
+    for (let user in rooms[roomKey].users) {
+      if (!user.fold) {
+        return user;
+      }
+    }
+  }
+
+// Last to act player who is not folded yet
+// For example if it is pre-flop, last to act is 1/BigBlind, if he folded and someone else raised, last to act in the round is 0/SmallBlind, if he did not fold yet.
+  function getLastToAct(roomKey, lastKnownUnfolded) {
+    for (let user in rooms[roomKey].users) {
+      if (user.seat===lastKnownUnfolded) {
+        if (!user.fold) {
+          return user;
+        } else {
+          if (lastKnownUnfolded===0) {
+            return getLastToAct(roomKey, (Object.keys(rooms[roomKey].users).length-1));
+          } else {
+            return getLastToAct(roomKey, (lastKnownUnfolded-1));
+          }
+        }
+      }
+    }
+  }
 });
 
 let port = process.env.PORT;
@@ -312,81 +407,5 @@ if (port == null || port == "") {
 server.listen(port, () => {
   console.log("Node app is running on port 3000");
 });
-
-
-function isEmpty( obj ) {
-  return Object.keys(obj).length === 0;
-}
-
-// Collects users bets into rooms pot, changes games stage/state
-function endRound(roomKey) {
-  let roundsPot = 0.00;
-  for (let user in rooms[roomKey].users) {
-    roundsPot = roundsPot + user.currentBet;
-    rooms[roomKey].users[user.name].currentBet = 0.00;
-  }
-  rooms[roomKey].pot = roundsPot;
-  rooms[roomKey].currentBiggestBet = 0.00;
-
-  if (rooms[roomKey].stage != 4) {
-    rooms[roomKey].stage++;
-  }
-}
-
-// If requested User folded, get next unfolded User
-function getUserBySeat(roomKey, nextSeat) {
-  if (nextSeat === (Object.keys(rooms[roomKey].users).length)) {
-    nextSeat = 0;
-  }
-  for (let user in rooms[roomKey].users) {
-    if (user.seat === nextSeat) {
-      if (user.fold) {
-        return getUserBySeat(roomKey, (nextSeat+1));
-      } else {
-        return user;
-      }
-    }
-  }
-}
-
-function getRoomsAdmin(roomKey) {
-  for (let user in rooms[roomKey].users) {
-    if (user.admin) {
-      return user;
-    }
-  }
-}
-
-function resetFolds(roomKey) {
-  for (let user in rooms[roomKey].users) {
-    user.fold = false;
-  }
-}
-
-function getLastUnfolded(roomKey) {
-  for (let user in rooms[roomKey].users) {
-    if (!user.fold) {
-      return user;
-    }
-  }
-}
-
-// Last to act player who is not folded yet
-// For example if it is pre-flop, last to act is 1/BigBlind, if he folded and someone else raised, last to act in the round is 0/SmallBlind, if he did not fold yet.
-function getLastToAct(roomKey, lastKnownUnfolded) {
-  for (let user in rooms[roomKey].users) {
-    if (user.seat===lastKnownUnfolded) {
-      if (!user.fold) {
-        return user;
-      } else {
-        if (lastKnownUnfolded===0) {
-          return getLastToAct(roomKey, (Object.keys(rooms[roomKey].users).length-1));
-        } else {
-          return getLastToAct(roomKey, (lastKnownUnfolded-1));
-        }
-      }
-    }
-  }
-}
 
 module.exports = router;
