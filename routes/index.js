@@ -86,15 +86,11 @@ io.on("connection", (socket) => {
     rooms[roomKey].stage = 1;
     if (Object.keys(rooms[roomKey].users).length > 2) {
       // If more than 2 players in the room, find UTG and send action request
-      console.log("Get next playable user from room " + roomKey + " from seat" + 2);
       const nextUser = getUserBySeat(roomKey, 2);
-      console.log(nextUser);
       io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
     } else {
       // If only two players in the room, send action request to SB
-      console.log("Get next playable user from room " + roomKey + " from seat" + 0);
       const nextUser = getUserBySeat(roomKey, 0);
-      console.log(nextUser);
       io.in(roomKey).emit("turngiven", nextUser.name, rooms[roomKey].currentBiggestBet, rooms[roomKey].stage);// Lets client know who's turn it is to take action. Sends currently biggest bet, so player knows what is the minimum raise
     }
   });
@@ -362,20 +358,14 @@ function endRound(roomKey) {
 // If requested User folded, get next unfolded User
 function getUserBySeat(roomKey, nextSeat) {
   if (nextSeat === (Object.keys(rooms[roomKey].users).length)) {
-    console.log("Got over the range of users, get user from seat 0");
     nextSeat = 0;
   }
-  console.log("Iterate through users in room " + roomKey);
   for (let user in rooms[roomKey].users) {
     const cUser = rooms[roomKey].users[user];
-    console.log(cUser);
     if (cUser.seat === nextSeat) {
-      console.log("User found");
       if (cUser.fold) {
-        console.log("User folded, going deeper");
         return getUserBySeat(roomKey, (nextSeat+1));
       } else {
-        console.log("User not folded, returning this user");
         return cUser;
       }
     }
