@@ -355,7 +355,7 @@ io.on("connection", (socket) => {
     }
     console.log("Iterate through users in room " + roomKey);
     for (let user in rooms[roomKey].users) {
-      console.log(User);
+      console.log(user);
       if (user.seat === nextSeat) {
         console.log("User found");
         if (user.fold) {
