@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
     rooms[roomKey].maxBuyIn = 250.00;
     rooms[roomKey].smallBlind = 1.00;
     rooms[roomKey].bigBlind = 2.00;
-    rooms[roomKey].currentBiggestBet = rooms[roomKey].bigBlind;// Keeps track of currently biggest bet, to let player know how much he should raise to match or double.
+    rooms[roomKey].currentBiggestBet = 0.00;// Keeps track of currently biggest bet, to let player know how much he should raise to match or double.
     rooms[roomKey].pot = 0.00;
     rooms[roomKey].stage = 0;// Games stage. 0 = not started, 1 = pre-fold, 2 = fold, 3 = turn, 4 = river.
 
@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
     rooms[roomKey].users[username].name = username;
     rooms[roomKey].users[username].id = socket.id;
     rooms[roomKey].users[username].balance = 0.00;
-    rooms[roomKey].users[username].currentBet = rooms[roomKey].smallBlind;
+    rooms[roomKey].users[username].currentBet = 0.00;
     rooms[roomKey].users[username].admin = true;
     rooms[roomKey].users[username].seat = 0;// Players seat. 0 = SB, 1 = BB, 2 = UTG ... LAST = D
     rooms[roomKey].users[username].fold = false;
@@ -84,6 +84,9 @@ io.on("connection", (socket) => {
   // Admin started the game
   socket.on("startgame", (roomKey) => {
     rooms[roomKey].stage = 1;
+    rooms[roomKey].currentBiggestBet = rooms[roomKey].bigBlind;
+    io.in(roomKey).emit("gamestarted", moveSeats(roomKey), (Object.keys(rooms[roomKey].users).length-1));
+
     if (Object.keys(rooms[roomKey].users).length > 2) {
       // If more than 2 players in the room, find UTG and send action request
       const nextUser = getUserBySeat(roomKey, 2);
@@ -291,6 +294,7 @@ io.on("connection", (socket) => {
   // Player raised
   socket.on("playerraised", (roomKey, playerName, playerSeat, raisedBet) => {
     const ownBetRaise = raisedBet - rooms[roomKey].users[playerName].bet;
+    rooms[roomKey].currentBiggestBet = raisedBet;
     rooms[roomKey].users[playerName].bet = raisedBet;
     rooms[roomKey].users[playerName].balance -= ownBetRaise;
 
@@ -352,10 +356,10 @@ function endRound(roomKey) {
   let roundsPot = 0.00;
   for (let user in rooms[roomKey].users) {
     const cUser = rooms[roomKey].users[user];
-    roundsPot = roundsPot + cUser.currentBet;
+    roundsPot += cUser.currentBet;
     rooms[roomKey].users[cUser.name].currentBet = 0.00;
   }
-  rooms[roomKey].pot = roundsPot;
+  rooms[roomKey].pot += roundsPot;
   rooms[roomKey].currentBiggestBet = 0.00;
 
   if (rooms[roomKey].stage != 4) {
@@ -422,6 +426,29 @@ function getLastToAct(roomKey, lastKnownUnfolded) {
       }
     }
   }
+}
+
+// Move D, SB, BB to the next players, returns array of players names in their seating order
+function moveSeats(roomKey) {
+    let newSeats = [];
+    for (let user in rooms[roomKey].users) {
+        const cUser = rooms[roomKey].users[user];
+        if (cUser.seat === (Object.keys(rooms[roomKey].users).length-1)) {
+            // Dealer, moves to SB
+            cUser.seat = 0;
+            cUser.currentBet = rooms[roomKey].smallBlind;
+            newSeats[0] = cUser.name;
+        } else if (cUser.seat === 0) {
+            // SB, moves to BB
+            cUser.seat++;
+            cUser.currentBet = rooms[roomKey].bigBlind;
+            newSeats[cUser.seat] = cUser.name;
+        } else {
+            cUser.seat++;
+            newSeats[cUser.seat] = cUser.name;
+        }
+    }
+    return newSeats;
 }
 
 module.exports = router;
