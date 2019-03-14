@@ -227,9 +227,9 @@ io.on("connection", (socket) => {
   // Player called
   socket.on("playercalled", (roomKey, playerName, playerSeat) => {
     const roomsStage = rooms[roomKey].stage;
-    const betRaise = rooms[roomKey].currentBiggestBet - rooms[roomKey].users[playerName].bet;
+    const betRaise = rooms[roomKey].currentBiggestBet - rooms[roomKey].users[playerName].currentBet;
     rooms[roomKey].users[playerName].balance -= betRaise;
-    rooms[roomKey].users[playerName].bet = rooms[roomKey].currentBiggestBet;
+    rooms[roomKey].users[playerName].currentBet = rooms[roomKey].currentBiggestBet;
     io.in(roomKey).emit("playercalled", playerName);
 
     let smallestBet;
@@ -293,9 +293,9 @@ io.on("connection", (socket) => {
 
   // Player raised
   socket.on("playerraised", (roomKey, playerName, playerSeat, raisedBet) => {
-    const ownBetRaise = raisedBet - rooms[roomKey].users[playerName].bet;
+    const ownBetRaise = raisedBet - rooms[roomKey].users[playerName].currentBet;
     rooms[roomKey].currentBiggestBet = raisedBet;
-    rooms[roomKey].users[playerName].bet = raisedBet;
+    rooms[roomKey].users[playerName].currentBet = raisedBet;
     rooms[roomKey].users[playerName].balance -= ownBetRaise;
 
     io.in(roomKey).emit("playerraised", playerName, raisedBet);

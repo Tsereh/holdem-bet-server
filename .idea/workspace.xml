@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="71c0157a-40b9-4af3-a30d-8632e4c418cc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -19,8 +18,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/routes/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="313">
-              <caret line="442" column="25" lean-forward="true" selection-start-line="442" selection-start-column="25" selection-end-line="442" selection-end-column="25" />
+            <state relative-caret-position="190">
+              <caret line="295" column="80" lean-forward="true" selection-start-line="295" selection-start-column="80" selection-end-line="295" selection-end-column="80" />
             </state>
           </provider>
         </entry>
@@ -64,6 +63,8 @@
       <find>for (let user</find>
       <find>console</find>
       <find>pot</find>
+      <find>bet</find>
+      <find>.bet</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -80,7 +81,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="108" />
+    <option name="x" value="137" />
     <option name="y" value="27" />
     <option name="width" value="1483" />
     <option name="height" value="863" />
@@ -153,12 +154,12 @@
       <workItem from="1552307932958" duration="20047000" />
       <workItem from="1552409005537" duration="6820000" />
       <workItem from="1552481528055" duration="21833000" />
-      <workItem from="1552571026945" duration="7494000" />
+      <workItem from="1552571026945" duration="9089000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="116529000" />
+    <option name="totallyTimeSpent" value="118124000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
@@ -193,8 +194,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/routes/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="313">
-          <caret line="442" column="25" lean-forward="true" selection-start-line="442" selection-start-column="25" selection-end-line="442" selection-end-column="25" />
+        <state relative-caret-position="190">
+          <caret line="295" column="80" lean-forward="true" selection-start-line="295" selection-start-column="80" selection-end-line="295" selection-end-column="80" />
         </state>
       </provider>
     </entry>
