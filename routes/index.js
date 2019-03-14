@@ -437,11 +437,13 @@ function moveSeats(roomKey) {
             // Dealer, moves to SB
             cUser.seat = 0;
             cUser.currentBet = rooms[roomKey].smallBlind;
+            cUser.balance -= cUser.currentBet;
             newSeats[0] = cUser.name;
         } else if (cUser.seat === 0) {
             // SB, moves to BB
             cUser.seat++;
             cUser.currentBet = rooms[roomKey].bigBlind;
+            cUser.balance -= cUser.currentBet;
             newSeats[cUser.seat] = cUser.name;
         } else {
             cUser.seat++;
