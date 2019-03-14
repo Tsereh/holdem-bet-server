@@ -166,8 +166,8 @@ io.on("connection", (socket) => {
       endRound(roomKey);
       io.in(roomKey).emit("roundended", rooms[roomKey].pot);
       const winners = [getLastUnfolded(roomKey)];
-      io.in(roomKey).emit("winnersannounced", winners, room[roomKey].pot);
-      room[roomKey].pot = 0.00;
+      io.in(roomKey).emit("winnersannounced", winners, rooms[roomKey].pot);
+      rooms[roomKey].pot = 0.00;
     } else {
       if (roomsStage===1) {
         // Pre-flop, Big Blind is last to act
@@ -303,11 +303,11 @@ io.on("connection", (socket) => {
   // Admin picked the winners
   socket.on("winnerspicked", (roomKey, winnerNames) => {
     const prize = (rooms[roomKey].pot)/(winnerNames.length);
-    room[roomKey].pot = 0.00;
+    rooms[roomKey].pot = 0.00;
     let winners = [];
     winnerNames.forEach(function (item, index, array) {
-      room[roomKey].users[item].balance += prize;
-      winners.push(room[roomKey].users[item]);
+      rooms[roomKey].users[item].balance += prize;
+      winners.push(rooms[roomKey].users[item]);
     });
     io.in(roomKey).emit("winnersannounced", winners, prize);
   });
@@ -334,7 +334,7 @@ io.on("connection", (socket) => {
 });
 
 let port = process.env.PORT;
-if (port == null || port == "") {
+if (port == null || port === "") {
   port = 3000;
 }
 server.listen(port, () => {
