@@ -290,9 +290,9 @@ io.on("connection", (socket) => {
 
   // Player raised
   socket.on("playerraised", (roomKey, playerName, playerSeat, raisedBet) => {
-    const betRaise = raisedBet - rooms[roomKey].users[playerName].bet;
+    const ownBetRaise = raisedBet - rooms[roomKey].users[playerName].bet;
     rooms[roomKey].users[playerName].bet = raisedBet;
-    rooms[roomKey].users[playerName].balance -= betRaise;
+    rooms[roomKey].users[playerName].balance -= ownBetRaise;
 
     io.in(roomKey).emit("playerraised", playerName, raisedBet);
 
@@ -302,7 +302,7 @@ io.on("connection", (socket) => {
 
   // Admin picked the winners
   socket.on("winnerspicked", (roomKey, winnerNames) => {
-    const prize = (room[roomKey].pot)/(winnerNames.length);
+    const prize = (rooms[roomKey].pot)/(winnerNames.length);
     room[roomKey].pot = 0.00;
     let winners = [];
     winnerNames.forEach(function (item, index, array) {
